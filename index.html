@@ -32,7 +32,7 @@
   .zine{
     position:relative;
     width:100%;
-    max-width:460px;
+    max-width:380px;
     min-height:640px;
     background:var(--paper);
     box-shadow: 0 20px 50px var(--paper-shadow), 0 0 0 1px rgba(0,0,0,0.05);
@@ -229,6 +229,40 @@
     margin:0 6px 6px 0;
     border-radius:20px;
   }
+  .tier-scatter{
+    position:relative;
+    height:150px;
+    margin:16px 0 10px;
+  }
+  .tier-stamp{
+    position:absolute;
+    font-family:'Courier New',ui-monospace,monospace;
+    font-weight:800;
+    font-size:12.5px;
+    letter-spacing:0.5px;
+    padding:8px 12px;
+    border:2.5px double var(--dark);
+    background:var(--paper);
+    white-space:nowrap;
+  }
+  .tier-stamp.low{
+    top:0; left:0;
+    color:var(--danger);
+    border-color:var(--danger);
+    transform:rotate(-7deg);
+  }
+  .tier-stamp.mid{
+    top:46px; left:38%;
+    color:var(--accent);
+    border-color:var(--accent);
+    transform:rotate(4deg);
+  }
+  .tier-stamp.high{
+    top:96px; left:6%;
+    color:var(--dark);
+    border-color:var(--dark);
+    transform:rotate(-3deg);
+  }
   .source{
     font-size:11px;
     opacity:0.6;
@@ -363,12 +397,16 @@ const pages = [
   <div class="eyebrow">สถานการณ์ล่าสุด</div>
   <h2>สายส่งล่ม<br>เมืองมืดสนิท</h2>
   <div class="card">
-    <p style="margin:0;">03:14 น. ไฟฟ้าทั้งกริดดับพร้อมกัน ไม่มีใครรู้ว่าเป็นฝีมือซอมบี้ พายุสุริยะ หรือแค่โรงไฟฟ้าพังอีกแล้ว สิ่งเดียวที่แน่นอนคือ: บ้านไหนมีแดดเป็นของตัวเอง บ้านนั้นรอด</p>
+    <p style="margin:0;">03:14 น. ไฟฟ้าทั้งระบบดับพร้อมกัน ไม่มีใครรู้ว่าเป็นฝีมือซอมบี้ พายุสุริยะ หรือแค่โรงไฟฟ้าพังอีกแล้ว สิ่งเดียวที่แน่นอนคือ: บ้านไหนมีแดดเป็นของตัวเอง บ้านนั้นรอด</p>
     <small>REPORT #229 · CLASSIFIED</small>
   </div>
   <p>ก่อนจะไปถึงวันนั้น เรามีแบบทดสอบสั้น ๆ 4 ข้อ ให้เช็คว่าบ้านคุณ "พร้อมมีไฟแดดเป็นของตัวเอง" แค่ไหน คำถามอาจดูไร้สาระ แต่คำตอบอิงจากเงื่อนไขจริงของการติดโซลาร์รูฟท็อปในไทยล้วน ๆ</p>
   <p style="font-weight:600;">ตอบให้ครบ 4 ข้อ แล้วดูว่าคุณจะได้เป็น...</p>
-  <p class="tag">เหยื่อซอมบี้</p><p class="tag" style="display:inline-block;">ผู้รอดชีวิตสมัครเล่น</p><p class="tag" style="display:inline-block;">หัวหน้าแก๊งผู้รอด</p>
+  <div class="tier-scatter">
+    <span class="tier-stamp low">เหยื่อซอมบี้</span>
+    <span class="tier-stamp mid">ผู้รอดชีวิตสมัครเล่น</span>
+    <span class="tier-stamp high">หัวหน้าแก๊งผู้รอด</span>
+  </div>
   <div style="margin-top:auto;">
     <button class="btn big" onclick="goNext()">เริ่มทดสอบ →</button>
   </div>
@@ -380,7 +418,7 @@ const pages = [
   ${meterHTML()}
   <h2>ซอมบี้กลัวแดด<br>บ้านคุณมีแดดมั้ย?</h2>
   <p>แผงโซลาร์ผลิตไฟจาก "ความเข้มของแสง" ไม่ใช่ความร้อน แถมทิศทาง-ความเอียงของหลังคายังมีผลกับปริมาณไฟที่ผลิตได้ด้วย</p>
-  <button class="btn" onclick="answer('q1',2)">แดดจัดทั้งวัน หลังคาไม่มีอะไรบัง<span class="opt-note">โซลาร์เพเนลจะรักคุณมาก</span></button>
+  <button class="btn" onclick="answer('q1',2)">แดดจัดทั้งวัน หลังคาไม่มีอะไรบัง<span class="opt-note">โซลาร์เซลล์จะรักคุณมาก</span></button>
   <button class="btn" onclick="answer('q1',1)">มีแดดบ้าง แต่โดนตึกข้างบ้านบังครึ่งนึง<span class="opt-note">ยังพอไหว แต่ผลิตไฟได้ลดลง</span></button>
   <button class="btn" onclick="answer('q1',0)">อยู่ในซอกตึก แดดแทบไม่ถึง<span class="opt-note">ซอมบี้ยิ้ม คุณร้องไห้</span></button>
   ${nav()}
@@ -445,7 +483,7 @@ const pages = [
 // PAGE 7 - BACK COVER / CTA
 () => `
   <div class="eyebrow">Field Manual · Back Cover</div>
-  <h2>ไม่พร้อมคนเดียว<br>ก็รอดได้</h2>
+  <h2>กฎข้อแรกของการเอาชีวิตรอด<br>อย่าอยู่คนเดียว</h2>
   <p>ถ้าตัวเองยังติดไม่ได้ตอนนี้ก็ไม่ใช่จุดจบ เพราะความมั่นคงทางพลังงานที่แท้จริงคือ "ชุมชนที่มีไฟแดดกระจายอยู่รอบตัว" เริ่มจากชวนข้างบ้านคุยเรื่องนี้ก็ได้</p>
   <div class="stamp" style="transform:rotate(3deg);">จะสงคราม ภัยพิบัติ ก็รอด</div>
   <div class="divider"></div>
