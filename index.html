@@ -36,7 +36,7 @@
     position:relative;
     width:100%;
     max-width:380px;
-    min-height:640px;
+    min-height:560px;
     background:var(--paper);
     box-shadow: 0 20px 50px var(--paper-shadow), 0 0 0 1px rgba(0,0,0,0.05);
     background-image:
@@ -65,7 +65,7 @@
     padding:26px 24px 20px;
     display:flex;
     flex-direction:column;
-    min-height:560px;
+    min-height:480px;
   }
   .eyebrow{
     font-family:'Courier New',ui-monospace,monospace;
@@ -344,15 +344,19 @@
   }
   .visitor-counter{
     position:fixed;
-    bottom:10px;
+    bottom:12px;
     left:50%;
     transform:translateX(-50%);
     font-family:'Courier New',ui-monospace,monospace;
-    font-size:10.5px;
+    font-size:11px;
     letter-spacing:0.5px;
-    color:rgba(245,239,227,0.32);
+    color:rgba(245,239,227,0.55);
+    background:rgba(245,239,227,0.06);
+    border:1px solid rgba(245,239,227,0.18);
+    padding:4px 12px;
+    border-radius:14px;
     z-index:5;
-    pointer-events:none;
+    cursor:pointer;
     white-space:nowrap;
   }
 </style>
@@ -370,7 +374,7 @@
   <div class="torn-bottom"></div>
 </div>
 
-<div class="visitor-counter" id="visitorCounter"></div>
+<div class="visitor-counter" id="visitorCounter" onclick="handleCounterClick()"></div>
 
 <script>
 const state = { page: 0, answers: {}, lang: 'th' };
@@ -381,8 +385,8 @@ function score(){
 }
 
 const UI = {
-  th:{ meterLabel:"ระดับพร้อมรอด", back:"<< ย้อนกลับ", next:"ถัดไป >>", page:(n)=>`หน้า ${n}/8`, visitors:(n)=>`ผู้เข้าชมทั้งหมด: ${n}` },
-  en:{ meterLabel:"Survival readiness", back:"<< Back", next:"Next >>", page:(n)=>`Page ${n}/8`, visitors:(n)=>`Total visitors: ${n}` }
+  th:{ meterLabel:"ระดับพร้อมรอด", back:"<< ย้อนกลับ", next:"ถัดไป >>", page:(n)=>`หน้า ${n}/8`, visitors:(n)=>`ผู้เข้าชมทั้งหมด: ${n}`, bunker:"🕳️ คุณเจอบังเกอร์ลับแล้ว" },
+  en:{ meterLabel:"Survival readiness", back:"<< Back", next:"Next >>", page:(n)=>`Page ${n}/8`, visitors:(n)=>`Total visitors: ${n}`, bunker:"🕳️ You found the bunker" }
 };
 
 function meterHTML(){
@@ -420,16 +424,22 @@ function goPrev(){ if(state.page>0){ state.page--; render(); } }
 function verdict(){
   const s = score();
   const th = {
+    secretHigh:{ title:"ผู้ก่อตั้งลัทธิไฟแดด", sub:"SOLAR CULT FOUNDER", body:"8 เต็ม 8 ไม่มีจุดอ่อนเลยสักข้อ คุณไม่ใช่แค่รอด คุณคือคนที่ทั้งซอยจะมาขอพึ่งไฟ เตรียมตัวเป็นผู้นำลัทธิไฟแดดประจำหมู่บ้านได้เลย" },
     high:{ title:"หัวหน้าแก๊งผู้รอด", sub:"SOLAR PREPPER LEGEND", body:"พวกกลายพันธุ์มาก็เชิญ ไฟดับทั้งประเทศก็เชิญ บ้านคุณติดโซลาร์ได้จริง แถมคุ้มทุนไวด้วย เหลือแค่โทรหาช่างกับยื่นเรื่องขออนุญาตเท่านั้นเอง" },
     mid:{ title:"ผู้รอดชีวิตสมัครเล่น", sub:"ROOKIE SURVIVOR", body:"ยังพอมีลุ้น แต่มีจุดอ่อนอยู่บ้าง (เงินทุน หรือโครงสร้างหลังคา หรือเอกสาร) ต้องวางแผนก่อนไฟดับจริง แนะนำให้เริ่มจากเช็คงบและคุยกับช่างที่ไว้ใจได้" },
-    low:{ title:"เหยื่อพวกกลายพันธุ์", sub:"ZOMBIE BAIT", body:"บ้านคุณยังไม่พร้อมติดเองตอนนี้ แต่ไม่ต้องท้อ ในโลกที่ไฟดับ คนที่รอดคือคนที่มีเพื่อนบ้านดี ๆ ที่ติดโซลาร์ไว้ก่อน แล้วไปลุ้นข้างบ้านแทน" }
+    low:{ title:"เหยื่อพวกกลายพันธุ์", sub:"ZOMBIE BAIT", body:"บ้านคุณยังไม่พร้อมติดเองตอนนี้ แต่ไม่ต้องท้อ ในโลกที่ไฟดับ คนที่รอดคือคนที่มีเพื่อนบ้านดี ๆ ที่ติดโซลาร์ไว้ก่อน แล้วไปลุ้นข้างบ้านแทน" },
+    secretLow:{ title:"ทูตแห่งความมืด", sub:"LORD OF DARKNESS", body:"แดดก็ไม่มี เงินก็ไม่มี หลังคาก็ไม่มี เอกสารก็ไม่มี คุณทำได้ยังไงให้แพ้ครบทุกข้อขนาดนี้ อย่างน้อยก็สม่ำเสมอดี ไปสมัครเป็นทูตประจำถ้ำแทนละกัน" }
   };
   const en = {
+    secretHigh:{ title:"Solar Cult Founder", sub:"SOLAR CULT FOUNDER", body:"Perfect score, not a single weak spot. You're not just surviving, the whole street is coming to you for power. Time to found your own solar cult." },
     high:{ title:"Survivor Gang Leader", sub:"SOLAR PREPPER LEGEND", body:"Bring on the zombies, bring on a nationwide blackout. Your house can genuinely go solar, and pay itself back fast. All that's left is calling an installer and filing the permit." },
     mid:{ title:"Rookie Survivor", sub:"ROOKIE SURVIVOR", body:"You've got a shot, but there are some weak spots (budget, roof structure, or paperwork). Plan ahead before the lights actually go out. Start by checking your budget and talking to a trusted installer." },
-    low:{ title:"Zombie Bait", sub:"ZOMBIE BAIT", body:"Your house isn't ready to install solar right now, but don't lose heart. In a world with no power, the ones who survive are the ones with good neighbors who installed solar first. Go put your hopes in them instead." }
+    low:{ title:"Zombie Bait", sub:"ZOMBIE BAIT", body:"Your house isn't ready to install solar right now, but don't lose heart. In a world with no power, the ones who survive are the ones with good neighbors who installed solar first. Go put your hopes in them instead." },
+    secretLow:{ title:"Lord of Darkness", sub:"LORD OF DARKNESS", body:"No sun, no money, no roof, no paperwork. How did you manage to fail every single question? At least you're consistent. Go apply to be ambassador of the nearest cave." }
   };
   const t = state.lang === 'en' ? en : th;
+  if(s===MAX_SCORE) return t.secretHigh;
+  if(s===0) return t.secretLow;
   if(s>=6) return t.high;
   if(s>=3) return t.mid;
   return t.low;
@@ -611,8 +621,8 @@ const pagesEN = [
   <div class="eyebrow">Question 1 / 4</div>
   ${meterHTML()}
   <h2>Zombies fear sunlight.<br>Does your house get any?</h2>
-  <p>Solar cells generate power from light intensity, not heat. Your roof's direction and tilt also affect how much power you can produce.</p>
-  <button class="btn" onclick="answer('q1',2)">Full sun all day, nothing blocking the roof<span class="opt-note">Solar cells will love you</span></button>
+  <p>Solar panels generate power from light intensity, not heat. Your roof's direction and tilt also affect how much power you can produce.</p>
+  <button class="btn" onclick="answer('q1',2)">Full sun all day, nothing blocking the roof<span class="opt-note">Solar panels will love you</span></button>
   <button class="btn" onclick="answer('q1',1)">Some sun, but half-blocked by the building next door<span class="opt-note">Still workable, but you'll produce less power</span></button>
   <button class="btn" onclick="answer('q1',0)">Tucked between buildings, barely any sun reaches<span class="opt-note">The zombies smile. You cry.</span></button>
   ${nav()}
@@ -732,8 +742,33 @@ function updateVisitorLabel(){
   const el = document.getElementById('visitorCounter');
   if(!el) return;
   const u = UI[state.lang];
-  el.textContent = visitorCount === null ? '' : u.visitors(visitorCount);
+  el.textContent = visitorCount === null ? u.visitors('···') : u.visitors(visitorCount);
 }
+
+let counterClicks = 0;
+let counterClickTimer = null;
+function handleCounterClick(){
+  counterClicks++;
+  clearTimeout(counterClickTimer);
+  counterClickTimer = setTimeout(()=>{ counterClicks = 0; }, 1500);
+
+  if(counterClicks >= 5){
+    counterClicks = 0;
+    const el = document.getElementById('visitorCounter');
+    if(!el) return;
+    const u = UI[state.lang];
+    el.textContent = u.bunker;
+    el.style.color = 'rgba(251,139,36,0.9)';
+    el.style.borderColor = 'rgba(251,139,36,0.5)';
+    setTimeout(()=>{
+      el.style.color = '';
+      el.style.borderColor = '';
+      updateVisitorLabel();
+    }, 2500);
+  }
+}
+
+updateVisitorLabel();
 
 fetch('https://api.countapi.xyz/hit/thegoodchat-endoftheworld/visits')
   .then(r => r.json())
@@ -742,8 +777,7 @@ fetch('https://api.countapi.xyz/hit/thegoodchat-endoftheworld/visits')
     updateVisitorLabel();
   })
   .catch(() => {
-    const el = document.getElementById('visitorCounter');
-    if(el) el.textContent = '';
+    updateVisitorLabel();
   });
 
 render();
