@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>คู่มือเอาชีวิตรอด: ฉบับไฟดับทั้งโลก</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9A%A0%EF%B8%8F</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5EFE3;
@@ -26,7 +29,7 @@
     align-items:center;
     justify-content:center;
     padding:24px 12px;
-    font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+    font-family:'Raleway',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
     color:var(--ink);
   }
   .zine{
@@ -131,7 +134,7 @@
   .btn.big:hover{ background:#e07d1c; }
   .opt-note{
     display:block;
-    font-family:-apple-system,'Segoe UI',sans-serif;
+    font-family:'Raleway',-apple-system,'Segoe UI',sans-serif;
     font-weight:400;
     text-transform:none;
     letter-spacing:0;
@@ -308,9 +311,58 @@
     opacity:0.85;
     transform:rotate(8deg);
   }
+  .lang-toggle{
+    position:fixed;
+    top:16px;
+    right:16px;
+    z-index:50;
+    display:flex;
+    gap:2px;
+    background:var(--paper);
+    border:2px solid var(--dark);
+    border-radius:20px;
+    padding:3px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.3);
+  }
+  .lang-toggle button{
+    font-family:'Courier New',ui-monospace,monospace;
+    font-weight:800;
+    font-size:11px;
+    letter-spacing:0.5px;
+    border:none;
+    background:none;
+    color:var(--dark);
+    opacity:0.4;
+    padding:5px 10px;
+    border-radius:14px;
+    cursor:pointer;
+  }
+  .lang-toggle button.active{
+    background:var(--dark);
+    color:var(--paper);
+    opacity:1;
+  }
+  .visitor-counter{
+    position:fixed;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Courier New',ui-monospace,monospace;
+    font-size:10.5px;
+    letter-spacing:0.5px;
+    color:rgba(245,239,227,0.32);
+    z-index:5;
+    pointer-events:none;
+    white-space:nowrap;
+  }
 </style>
 </head>
 <body>
+
+<div class="lang-toggle" id="langToggle">
+  <button id="langTH" class="active" onclick="setLang('th')">TH</button>
+  <button id="langEN" onclick="setLang('en')">EN</button>
+</div>
 
 <div class="zine">
   <div class="torn-top"></div>
@@ -318,30 +370,39 @@
   <div class="torn-bottom"></div>
 </div>
 
+<div class="visitor-counter" id="visitorCounter"></div>
+
 <script>
-const state = { page: 0, answers: {} };
+const state = { page: 0, answers: {}, lang: 'th' };
 const MAX_SCORE = 8;
 
 function score(){
   return Object.values(state.answers).reduce((a,b)=>a+b,0);
 }
 
+const UI = {
+  th:{ meterLabel:"ระดับพร้อมรอด", back:"<< ย้อนกลับ", next:"ถัดไป >>", page:(n)=>`หน้า ${n}/8`, visitors:(n)=>`ผู้เข้าชมทั้งหมด: ${n}` },
+  en:{ meterLabel:"Survival readiness", back:"<< Back", next:"Next >>", page:(n)=>`Page ${n}/8`, visitors:(n)=>`Total visitors: ${n}` }
+};
+
 function meterHTML(){
   const s = score();
   const pct = Math.round((s/MAX_SCORE)*100);
+  const u = UI[state.lang];
   return `
     <div class="meter-wrap">
-      <div class="meter-label"><span>ระดับพร้อมรอด</span><span>${s}/${MAX_SCORE}</span></div>
+      <div class="meter-label"><span>${u.meterLabel}</span><span>${s}/${MAX_SCORE}</span></div>
       <div class="meter-shell"><div class="meter-fill" style="width:${pct}%"></div></div>
     </div>`;
 }
 
-function nav(showBack, showMeter){
+function nav(){
+  const u = UI[state.lang];
   return `
     <div class="footer-nav">
-      <button class="navbtn" onclick="goPrev()" ${state.page===0?'disabled':''}>&lt;&lt; ย้อนกลับ</button>
-      <span class="pagecount">หน้า ${state.page+1}/8</span>
-      <button class="navbtn" id="nextBtn" onclick="goNext()" ${state.page===7?'disabled':''}>ถัดไป &gt;&gt;</button>
+      <button class="navbtn" onclick="goPrev()" ${state.page===0?'disabled':''}>${u.back}</button>
+      <span class="pagecount">${u.page(state.page+1)}</span>
+      <button class="navbtn" id="nextBtn" onclick="goNext()" ${state.page===7?'disabled':''}>${u.next}</button>
     </div>`;
 }
 
@@ -358,37 +419,36 @@ function goPrev(){ if(state.page>0){ state.page--; render(); } }
 
 function verdict(){
   const s = score();
-  if(s>=6) return {
-    title:"หัวหน้าแก๊งผู้รอด",
-    sub:"SOLAR PREPPER LEGEND",
-    body:"ซอมบี้มาก็เชิญ ไฟดับทั้งประเทศก็เชิญ บ้านคุณติดโซลาร์ได้จริง แถมคุ้มทุนไวด้วย เหลือแค่โทรหาช่างกับยื่นเรื่องขออนุญาตเท่านั้นเอง"
+  const th = {
+    high:{ title:"หัวหน้าแก๊งผู้รอด", sub:"SOLAR PREPPER LEGEND", body:"พวกกลายพันธุ์มาก็เชิญ ไฟดับทั้งประเทศก็เชิญ บ้านคุณติดโซลาร์ได้จริง แถมคุ้มทุนไวด้วย เหลือแค่โทรหาช่างกับยื่นเรื่องขออนุญาตเท่านั้นเอง" },
+    mid:{ title:"ผู้รอดชีวิตสมัครเล่น", sub:"ROOKIE SURVIVOR", body:"ยังพอมีลุ้น แต่มีจุดอ่อนอยู่บ้าง (เงินทุน หรือโครงสร้างหลังคา หรือเอกสาร) ต้องวางแผนก่อนไฟดับจริง แนะนำให้เริ่มจากเช็คงบและคุยกับช่างที่ไว้ใจได้" },
+    low:{ title:"เหยื่อพวกกลายพันธุ์", sub:"ZOMBIE BAIT", body:"บ้านคุณยังไม่พร้อมติดเองตอนนี้ แต่ไม่ต้องท้อ ในโลกที่ไฟดับ คนที่รอดคือคนที่มีเพื่อนบ้านดี ๆ ที่ติดโซลาร์ไว้ก่อน แล้วไปลุ้นข้างบ้านแทน" }
   };
-  if(s>=3) return {
-    title:"ผู้รอดชีวิตสมัครเล่น",
-    sub:"ROOKIE SURVIVOR",
-    body:"ยังพอมีลุ้น แต่มีจุดอ่อนอยู่บ้าง (เงินทุน หรือโครงสร้างหลังคา หรือเอกสาร) ต้องวางแผนก่อนไฟดับจริง แนะนำให้เริ่มจากเช็คงบและคุยกับช่างที่ไว้ใจได้"
+  const en = {
+    high:{ title:"Survivor Gang Leader", sub:"SOLAR PREPPER LEGEND", body:"Bring on the zombies, bring on a nationwide blackout. Your house can genuinely go solar, and pay itself back fast. All that's left is calling an installer and filing the permit." },
+    mid:{ title:"Rookie Survivor", sub:"ROOKIE SURVIVOR", body:"You've got a shot, but there are some weak spots (budget, roof structure, or paperwork). Plan ahead before the lights actually go out. Start by checking your budget and talking to a trusted installer." },
+    low:{ title:"Zombie Bait", sub:"ZOMBIE BAIT", body:"Your house isn't ready to install solar right now, but don't lose heart. In a world with no power, the ones who survive are the ones with good neighbors who installed solar first. Go put your hopes in them instead." }
   };
-  return {
-    title:"เหยื่อซอมบี้",
-    sub:"ZOMBIE BAIT",
-    body:"บ้านคุณยังไม่พร้อมติดเองตอนนี้ แต่ไม่ต้องท้อ ในโลกที่ไฟดับ คนที่รอดคือคนที่มีเพื่อนบ้านดี ๆ ที่ติดโซลาร์ไว้ก่อน แล้วไปลุ้นข้างบ้านแทน"
-  };
+  const t = state.lang === 'en' ? en : th;
+  if(s>=6) return t.high;
+  if(s>=3) return t.mid;
+  return t.low;
 }
 
-const pages = [
+const pagesTH = [
 
 // PAGE 0 - COVER
 () => `
   <div class="zombie-corner">☢</div>
   <div class="eyebrow">Field Manual · Vol. 1</div>
-  <div class="stamp">ห้ามเปิด จนกว่าไฟจะดับ</div>
+  <div class="stamp">ระวังไฟดับ</div>
   <h1>END OF<br>THE WORLD<br>SURVIVAL<br>GUIDE</h1>
   <p style="margin-top:6px; font-weight:600;">บทที่ 1: How to มี #ไฟแดด เป็นของตัวเอง</p>
   <p>โลกจะแตกไม่แตกไม่รู้ แต่ค่าไฟทะลุปรอทแน่นอน คู่มือฉบับนี้จะเช็คให้ว่า ถ้าวันหนึ่งสายส่งล่มจริง ๆ (หรือแค่บิลไฟแพงจนรู้สึกแบบนั้น) บ้านคุณจะรอดในฐานะ "เจ้าของไฟแดด" ได้มั้ย</p>
   <div class="divider"></div>
   <p style="font-size:12px; opacity:0.6;">จัดทำโดย JET in Thailand × The Good Chat</p>
   <div style="margin-top:auto;">
-    <button class="btn big" onclick="goNext()">เปิดคู่มือ (ถ้ากล้า) →</button>
+    <button class="btn big" onclick="goNext()">อ่าน (ถ้ากล้า) →</button>
   </div>
 `,
 
@@ -397,13 +457,13 @@ const pages = [
   <div class="eyebrow">สถานการณ์ล่าสุด</div>
   <h2>สายส่งล่ม<br>เมืองมืดสนิท</h2>
   <div class="card">
-    <p style="margin:0;">03:14 น. ไฟฟ้าทั้งระบบดับพร้อมกัน ไม่มีใครรู้ว่าเป็นฝีมือซอมบี้ พายุสุริยะ หรือแค่โรงไฟฟ้าพังอีกแล้ว สิ่งเดียวที่แน่นอนคือ: บ้านไหนมีแดดเป็นของตัวเอง บ้านนั้นรอด</p>
+    <p style="margin:0;">03:14 น. ไฟฟ้าทั้งระบบดับพร้อมกัน ไม่มีใครรู้ว่าเป็นฝีมือพวกกลายพันธุ์ พายุสุริยะ หรือโรงไฟฟ้าพัง สิ่งเดียวที่แน่นอนคือ: บ้านไหนมีแดดเป็นของตัวเอง บ้านนั้นรอด</p>
     <small>REPORT #229 · CLASSIFIED</small>
   </div>
   <p>ก่อนจะไปถึงวันนั้น เรามีแบบทดสอบสั้น ๆ 4 ข้อ ให้เช็คว่าบ้านคุณ "พร้อมมีไฟแดดเป็นของตัวเอง" แค่ไหน คำถามอาจดูไร้สาระ แต่คำตอบอิงจากเงื่อนไขจริงของการติดโซลาร์รูฟท็อปในไทยล้วน ๆ</p>
   <p style="font-weight:600;">ตอบให้ครบ 4 ข้อ แล้วดูว่าคุณจะได้เป็น...</p>
   <div class="tier-scatter">
-    <span class="tier-stamp low">เหยื่อซอมบี้</span>
+    <span class="tier-stamp low">เหยื่อพวกกลายพันธุ์</span>
     <span class="tier-stamp mid">ผู้รอดชีวิตสมัครเล่น</span>
     <span class="tier-stamp high">หัวหน้าแก๊งผู้รอด</span>
   </div>
@@ -416,11 +476,11 @@ const pages = [
 () => `
   <div class="eyebrow">คำถามที่ 1 / 4</div>
   ${meterHTML()}
-  <h2>ซอมบี้กลัวแดด<br>บ้านคุณมีแดดมั้ย?</h2>
+  <h2>พวกกลายพันธุ์กลัวแดด<br>บ้านคุณมีแดดมั้ย?</h2>
   <p>แผงโซลาร์ผลิตไฟจาก "ความเข้มของแสง" ไม่ใช่ความร้อน แถมทิศทาง-ความเอียงของหลังคายังมีผลกับปริมาณไฟที่ผลิตได้ด้วย</p>
   <button class="btn" onclick="answer('q1',2)">แดดจัดทั้งวัน หลังคาไม่มีอะไรบัง<span class="opt-note">โซลาร์เซลล์จะรักคุณมาก</span></button>
   <button class="btn" onclick="answer('q1',1)">มีแดดบ้าง แต่โดนตึกข้างบ้านบังครึ่งนึง<span class="opt-note">ยังพอไหว แต่ผลิตไฟได้ลดลง</span></button>
-  <button class="btn" onclick="answer('q1',0)">อยู่ในซอกตึก แดดแทบไม่ถึง<span class="opt-note">ซอมบี้ยิ้ม คุณร้องไห้</span></button>
+  <button class="btn" onclick="answer('q1',0)">อยู่ในซอกตึก แดดแทบไม่ถึง<span class="opt-note">พวกกลายพันธุ์ยิ้ม คุณร้องไห้</span></button>
   ${nav()}
 `,
 
@@ -442,7 +502,7 @@ const pages = [
   ${meterHTML()}
   <h2>มีเงินสำรอง<br>ยามโลกแตกมั้ย?</h2>
   <p>โซลาร์ขนาด 5-10 kW ใช้เงินลงทุนประมาณ 1-2 แสนบาท (ไม่ต้องถึงขั้นทองคำแท่งสำรองใต้เตียง) ถ้าจะติดแบตเตอรี่ด้วยเพื่อใช้ไฟตอนกลางคืน ต้นทุนจะเพิ่มอีกราว 1.5-2 เท่า</p>
-  <button class="btn" onclick="answer('q3',2)">มีเงินก้อนพร้อมจ่าย 1-2 แสนบาท<span class="opt-note">จ่ายสด ไม่ง้อธนาคารซอมบี้</span></button>
+  <button class="btn" onclick="answer('q3',2)">มีเงินก้อนพร้อมจ่าย 1-2 แสนบาท<span class="opt-note">จ่ายสด ไม่ง้อธนาคารพวกกลายพันธุ์</span></button>
   <button class="btn" onclick="answer('q3',1)">พอมี แต่ต้องผ่อนหรือใช้สิทธิ์ลดหย่อนภาษี<span class="opt-note">ต้องวางแผนการเงินหน่อย แต่ยังไปได้</span></button>
   <button class="btn" onclick="answer('q3',0)">เงินสำรองมีไว้ซื้อบะหมี่กึ่งสำเร็จรูปตุนเท่านั้น<span class="opt-note">ยังไม่ใช่เวลาของคุณ (ตอนนี้)</span></button>
   ${nav()}
@@ -456,7 +516,7 @@ const pages = [
   <p>ต้องขออนุญาตหน่วยงานรัฐก่อนติดตั้ง และถ้าอยากขายไฟส่วนเกินคืน ตอนนี้รัฐเปิดโควตารับซื้อจากบ้านพักอาศัย ไม่เกิน 5 kW ราคา 2.2 บาท/หน่วย</p>
   <button class="btn" onclick="answer('q4',2)">หาช่างที่ไว้ใจได้แล้ว รู้ขั้นตอนขออนุญาตคร่าว ๆ<span class="opt-note">ทีมสนับสนุนพร้อมรบ</span></button>
   <button class="btn" onclick="answer('q4',1)">ยังไม่มีช่าง แต่พร้อมหาข้อมูล<span class="opt-note">ต้องปวดหัวกับเอกสารอีกสักพัก</span></button>
-  <button class="btn" onclick="answer('q4',0)">ไม่รู้จะเริ่มขอใบอนุญาตยังไงเลย<span class="opt-note">ซอมบี้มาไวกว่าเอกสารราชการ</span></button>
+  <button class="btn" onclick="answer('q4',0)">ไม่รู้จะเริ่มขอใบอนุญาตยังไงเลย<span class="opt-note">พวกกลายพันธุ์มาไวกว่าเอกสารราชการ</span></button>
   ${nav()}
 `,
 
@@ -509,16 +569,182 @@ const pages = [
 `,
 ];
 
+const pagesEN = [
+
+// PAGE 0 - COVER
+() => `
+  <div class="zombie-corner">☢</div>
+  <div class="eyebrow">Field Manual · Vol. 1</div>
+  <div class="stamp">CAUTION: BLACKOUT</div>
+  <h1>END OF<br>THE WORLD<br>SURVIVAL<br>GUIDE</h1>
+  <p style="margin-top:6px; font-weight:600;">Chapter 1: How to get your own #ไฟแดด (rooftop solar)</p>
+  <p>We don't know if the world will actually end, but your electricity bill definitely will. This guide checks whether your home could survive as a "solar owner" if the grid ever really goes down (or just feels like it when the bill arrives).</p>
+  <div class="divider"></div>
+  <p style="font-size:12px; opacity:0.6;">Produced by JET in Thailand × The Good Chat</p>
+  <div style="margin-top:auto;">
+    <button class="btn big" onclick="goNext()">Open the manual (if you dare) →</button>
+  </div>
+`,
+
+// PAGE 1 - PREMISE / BRIEFING
+() => `
+  <div class="eyebrow">Latest Situation</div>
+  <h2>GRID DOWN<br>CITY GOES DARK</h2>
+  <div class="card">
+    <p style="margin:0;">03:14 AM. The entire power grid goes dark at once. Nobody knows if it's zombies, a solar storm, or just another power plant breakdown. One thing is certain: whichever house has its own sunlight, survives.</p>
+    <small>REPORT #229 · CLASSIFIED</small>
+  </div>
+  <p>Before that day comes, here's a short 4-question test to check how "ready to own your own ไฟแดด" your home really is. The questions may sound ridiculous, but the answers are based on the real conditions for installing rooftop solar in Thailand.</p>
+  <p style="font-weight:600;">Answer all 4 questions to find out which one you'll become...</p>
+  <div class="tier-scatter">
+    <span class="tier-stamp low">Zombie Bait</span>
+    <span class="tier-stamp mid">Rookie Survivor</span>
+    <span class="tier-stamp high">Survivor Gang Leader</span>
+  </div>
+  <div style="margin-top:auto;">
+    <button class="btn big" onclick="goNext()">Start the test →</button>
+  </div>
+`,
+
+// PAGE 2 - Q1 SUNLIGHT / ROOF ORIENTATION
+() => `
+  <div class="eyebrow">Question 1 / 4</div>
+  ${meterHTML()}
+  <h2>Zombies fear sunlight.<br>Does your house get any?</h2>
+  <p>Solar cells generate power from light intensity, not heat. Your roof's direction and tilt also affect how much power you can produce.</p>
+  <button class="btn" onclick="answer('q1',2)">Full sun all day, nothing blocking the roof<span class="opt-note">Solar cells will love you</span></button>
+  <button class="btn" onclick="answer('q1',1)">Some sun, but half-blocked by the building next door<span class="opt-note">Still workable, but you'll produce less power</span></button>
+  <button class="btn" onclick="answer('q1',0)">Tucked between buildings, barely any sun reaches<span class="opt-note">The zombies smile. You cry.</span></button>
+  ${nav()}
+`,
+
+// PAGE 3 - Q2 ROOF OWNERSHIP / CONDO VS HOUSE
+() => `
+  <div class="eyebrow">Question 2 / 4</div>
+  ${meterHTML()}
+  <h2>Is the roof<br>actually yours?</h2>
+  <p>To apply for a solar installation permit, you need to be the registered meter owner and be listed on the house registration. If you live in a condo or apartment, installing it yourself is very difficult.</p>
+  <button class="btn" onclick="answer('q2',2)">Own house, name on both the registration and meter<span class="opt-note">You've got your own bunker, lock the door and survive alone</span></button>
+  <button class="btn" onclick="answer('q2',1)">Family house, need to ask the elders first<span class="opt-note">You'll survive, but only after a family council meeting</span></button>
+  <button class="btn" onclick="answer('q2',0)">Living in a condo/apartment, no roof of your own<span class="opt-note">Time to find someone else's bunker</span></button>
+  ${nav()}
+`,
+
+// PAGE 4 - Q3 BUDGET
+() => `
+  <div class="eyebrow">Question 3 / 4</div>
+  ${meterHTML()}
+  <h2>Got savings for<br>when the world ends?</h2>
+  <p>A 5-10 kW solar system costs roughly 100,000-200,000 baht to install (no need for a stash of gold bars under the bed). Adding a battery for nighttime power roughly doubles that cost.</p>
+  <button class="btn" onclick="answer('q3',2)">Have a lump sum ready, 100,000-200,000 baht<span class="opt-note">Pay in cash, no need for zombie banks</span></button>
+  <button class="btn" onclick="answer('q3',1)">Have some, but need to finance it or use a tax deduction<span class="opt-note">Needs some financial planning, but it's doable</span></button>
+  <button class="btn" onclick="answer('q3',0)">Savings are just enough for instant noodles<span class="opt-note">Not your moment yet (for now)</span></button>
+  ${nav()}
+`,
+
+// PAGE 5 - Q4 PERMIT / INSTALLER / GRID SELL-BACK
+() => `
+  <div class="eyebrow">Question 4 / 4</div>
+  ${meterHTML()}
+  <h2>Got someone to help<br>install your armor?</h2>
+  <p>You need government permission before installing. If you want to sell excess power back, the government currently buys from households, up to 5 kW, at 2.2 baht per unit.</p>
+  <button class="btn" onclick="answer('q4',2)">Already found a trusted installer, roughly know the permit steps<span class="opt-note">Support team ready for battle</span></button>
+  <button class="btn" onclick="answer('q4',1)">No installer yet, but ready to research<span class="opt-note">Paperwork headaches ahead</span></button>
+  <button class="btn" onclick="answer('q4',0)">No idea how to even start the permit process<span class="opt-note">The zombies will arrive faster than the paperwork</span></button>
+  ${nav()}
+`,
+
+// PAGE 6 - RESULTS
+() => {
+  const v = verdict();
+  const s = score();
+  return `
+  <div class="eyebrow">Test Results</div>
+  <div class="verdict-badge">${v.sub}</div>
+  <h2>${v.title}</h2>
+  ${meterHTML()}
+  <p>${v.body}</p>
+  <div class="card">
+    <p style="margin:0;">Even a 5 kW system can cut your electricity bill by around 1,800 baht a month, or 21,600 baht a year, compared to buying all your power from the grid.</p>
+    <small>Calculated from grid power at ~4 baht/unit versus solar power at ~1 baht/unit</small>
+  </div>
+  <p style="font-weight:600;">Your score: ${s}/${MAX_SCORE}</p>
+  <div style="margin-top:auto;">
+    <button class="btn big" onclick="goNext()">See the back cover →</button>
+  </div>
+`;},
+
+// PAGE 7 - BACK COVER / CTA
+() => `
+  <div class="eyebrow">Field Manual · Back Cover</div>
+  <h2>RULE ONE OF SURVIVAL<br>NEVER GO IT ALONE</h2>
+  <p>If you can't install solar yourself right now, that's not the end. Real energy security means a community with sunlight spread all around it. You could start by just bringing it up with your neighbors.</p>
+  <div class="stamp" style="transform:rotate(3deg);">War or disaster, you'll survive</div>
+  <div class="divider"></div>
+  <p style="font-weight:600; margin-bottom:6px;">Tag and share:</p>
+  <p>
+    <span class="tag">#ไฟแดด</span>
+    <span class="tag">#SolarNextDoor</span>
+    <span class="tag">#ข้างบ้านเค้าติดโซลาร์</span>
+  </p>
+  <div class="qr-card">
+    <img src="data:image/png;base64,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" alt="QR code for Solar Next Door survey">
+    <div class="qr-text">
+      <p>Scan to take the survey</p>
+      <small><a href="https://makesense.typeform.com/solarnextdoor" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">makesense.typeform.com/solarnextdoor</a></small>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <p class="source">Sources: SDG Move, JustPow · justpow.co/article-thailand-solar-rooftop-policy<br>
+  Produced by JET in Thailand × The Good Chat</p>
+  <div style="margin-top:auto;">
+    <button class="btn big" onclick="restart()">↺ Restart the test</button>
+  </div>
+`,
+];
+
+function currentPages(){
+  return state.lang === 'en' ? pagesEN : pagesTH;
+}
+
 function restart(){
   state.page = 0;
   state.answers = {};
   render();
 }
 
+function setLang(lang){
+  state.lang = lang;
+  document.getElementById('langTH').classList.toggle('active', lang==='th');
+  document.getElementById('langEN').classList.toggle('active', lang==='en');
+  document.documentElement.lang = lang;
+  render();
+  updateVisitorLabel();
+}
+
 function render(){
   const stage = document.getElementById('stage');
-  stage.innerHTML = `<div class="fade-in">${pages[state.page]()}</div>`;
+  stage.innerHTML = `<div class="fade-in">${currentPages()[state.page]()}</div>`;
 }
+
+let visitorCount = null;
+function updateVisitorLabel(){
+  const el = document.getElementById('visitorCounter');
+  if(!el) return;
+  const u = UI[state.lang];
+  el.textContent = visitorCount === null ? '' : u.visitors(visitorCount);
+}
+
+fetch('https://api.countapi.xyz/hit/thegoodchat-endoftheworld/visits')
+  .then(r => r.json())
+  .then(data => {
+    visitorCount = data.value;
+    updateVisitorLabel();
+  })
+  .catch(() => {
+    const el = document.getElementById('visitorCounter');
+    if(el) el.textContent = '';
+  });
 
 render();
 </script>
